@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
@@ -24,8 +24,9 @@ export class TransactionsController {
   @Get(':id')
   async findOne(@Req() req: any, @Param('id') id: string) {
     const tx = await this.txService.findById(id);
-    if (!tx) return null;
-    if (tx.sender_id !== req.user.id && tx.receiver_id !== req.user.id) return null;
+    // Validar que el usuario sea remitente o receptor
+    if (tx.sender_id !== req.user.id && tx.receiver_id !== req.user.id)
+      throw new NotFoundException('Transacción no encontrada para este usuario');
     return tx;
   }
 }
