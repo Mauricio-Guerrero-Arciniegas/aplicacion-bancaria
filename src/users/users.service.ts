@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UsersService {
@@ -12,24 +11,58 @@ export class UsersService {
     private readonly userModel: typeof User,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    // 1️⃣ Encriptar la contraseña
+  // Crear usuario con balance opcional
+  async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    // 2️⃣ Generar número de cuenta único (puede ser uuid o algo custom)
-    const accountNumber = uuidv4();
+    // Número de cuenta estilo bancario: AC- seguido de 10 dígitos
+    const accountNumber =
+      'AC-' + Math.floor(1000000000 + Math.random() * 9000000000).toString();
 
-    // 3️⃣ Crear el usuario
-    return this.userModel.create({
+    const user = await this.userModel.create({
       name: createUserDto.name,
       email: createUserDto.email,
       password: hashedPassword,
       account_number: accountNumber,
-      balance: 0,
+      balance: createUserDto.balance ?? 0, // si no se envía, balance 0
     } as any);
+
+    const { password, ...result } = user.toJSON();
+    return result;
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userModel.findAll();
+  // Obtener todos los usuarios (sin password)
+  async findAll(): Promise<Omit<User, 'password'>[]> {
+    const users = await this.userModel.findAll();
+    return users.map(u => {
+      const { password, ...result } = u.toJSON();
+      return result;
+    });
+  }
+
+  // Buscar usuario por email (incluye password para login)
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userModel.findOne({ where: { email } });
+  }
+
+  // Buscar usuario por id (sin password)
+  async findById(id: string): Promise<Omit<User, 'password'>> {
+    const user = await this.userModel.findByPk(id);
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    const { password, ...result } = user.toJSON();
+    return result;
+  }
+
+  // Actualizar balance de un usuario
+  async updateBalance(userId: string, amount: number): Promise<Omit<User, 'password'>> {
+    const user = await this.userModel.findByPk(userId);
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    user.balance = amount;
+    await user.save();
+
+    const { password, ...result } = user.toJSON();
+    return result;
   }
 }

@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { UsersModule } from './users/users.module';
 import { TransactionsModule } from './transactions/transactions.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { TransactionsModule } from './transactions/transactions.module';
         password: config.get<string>('DATABASE_PASSWORD') ?? '',
         database: config.get<string>('DATABASE_NAME') ?? 'testdb',
         autoLoadModels: true,
-        sync: { force: true },
+        //sync: { force: true },
         synchronize: true,
         dialectOptions: {
           ssl: {
@@ -30,6 +31,7 @@ import { TransactionsModule } from './transactions/transactions.module';
       }),
     }),
     UsersModule,
+    AuthModule,
     TransactionsModule,
   ],
 })

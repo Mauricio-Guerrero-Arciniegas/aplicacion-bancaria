@@ -8,8 +8,8 @@
     "start:dev": "ts-node -r tsconfig-paths/register src/main.ts",
     "build": "nest build",
     "lint": "eslint \"src/**/*.ts\" --fix",
-    "migration": "sequelize db:migrate",
-    "seed": "sequelize db:seed:all",
+    "migration": "npx sequelize-cli db:migrate",
+    "seed": "npx sequelize-cli db:seed:all",
     "test": "jest"
   },
   "dependencies": {
@@ -49,6 +49,7 @@
     "@types/uuid": "^10.0.0",
     "eslint": "^8.40.0",
     "jest": "^29.6.0",
+    "sequelize-cli": "^6.6.3",
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",

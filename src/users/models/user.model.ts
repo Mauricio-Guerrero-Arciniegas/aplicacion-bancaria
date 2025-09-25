@@ -19,7 +19,7 @@ export class User extends Model<User> {
   password!: string;
 
   @Unique
-  @Column({ type: DataType.STRING(20), allowNull: false })
+  @Column({ type: DataType.STRING(10), allowNull: false })
   account_number!: string;
 
   @Column({ type: DataType.DECIMAL(10, 2), allowNull: false, defaultValue: 0.00 })

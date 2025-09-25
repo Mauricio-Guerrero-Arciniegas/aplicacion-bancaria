@@ -39,4 +39,11 @@ export class User extends Model<User> {
     defaultValue: 0,
   })
   balance!: number;
+
+  // 👇 Sobrescribir toJSON para ocultar el password
+  toJSON() {
+    const values: any = { ...this.get() };
+    delete values.password;
+    return values;
+  }
 }
