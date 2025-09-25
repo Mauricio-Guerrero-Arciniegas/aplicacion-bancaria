@@ -17,18 +17,21 @@ export class TransactionsService {
     if (isNaN(amount) || amount <= 0) throw new BadRequestException('Invalid amount');
 
     return await this.sequelize.transaction(async (t) => {
-      // lock both rows for update
+      // Bloquear filas para update
       const sender = await this.userModel.findByPk(senderId, { transaction: t, lock: t.LOCK.UPDATE });
       if (!sender) throw new NotFoundException('Sender not found');
+
       const receiver = await this.userModel.findByPk(dto.receiver_id, { transaction: t, lock: t.LOCK.UPDATE });
       if (!receiver) throw new NotFoundException('Receiver not found');
 
-      const senderBalance = parseFloat((sender as any).balance);
+      const senderBalance = Number(sender.balance);
+      const receiverBalance = Number(receiver.balance);
+
       if (senderBalance < amount) throw new BadRequestException('Insufficient funds');
 
-      // update balances
-      sender.balance = (senderBalance - amount).toFixed(2) as any;
-      receiver.balance = (parseFloat((receiver as any).balance) + amount).toFixed(2) as any;
+      // Actualizar balances como números
+      sender.balance = senderBalance - amount;
+      receiver.balance = receiverBalance + amount;
 
       await sender.save({ transaction: t });
       await receiver.save({ transaction: t });
@@ -47,12 +50,12 @@ export class TransactionsService {
   async findAllForUser(userId: string) {
     return this.txModel.findAll({
       where: {
-        [ (this.txModel.sequelize as any).Op.or ]: [
+        [(this.txModel.sequelize as any).Op.or]: [
           { sender_id: userId },
-          { receiver_id: userId }
-        ]
+          { receiver_id: userId },
+        ],
       },
-      order: [['transaction_date', 'DESC']]
+      order: [['transaction_date', 'DESC']],
     });
   }
 

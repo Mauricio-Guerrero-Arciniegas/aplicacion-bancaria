@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
 import { Request } from 'express';
 import { CreateUserDto } from './dto/create-user.dto';
+import { TransferDto } from './dto/transfer.dto';
 
 @Controller('users')
 export class UsersController {
@@ -29,5 +30,12 @@ export class UsersController {
   @Get()
   async findAll() {
     return this.usersService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('transfer')
+  async transfer(@Req() req: Request, @Body() transferDto: TransferDto) {
+    const user = req.user as any; // remitente
+    return this.usersService.transfer(user.id, transferDto);
   }
 }

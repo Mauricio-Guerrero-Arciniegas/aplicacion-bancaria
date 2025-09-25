@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { TransferDto } from './dto/transfer.dto';
 
 @Injectable()
 export class UsersService {
@@ -28,6 +29,7 @@ export class UsersService {
     } as any);
 
     const { password, ...result } = user.toJSON();
+    result.balance = Number(result.balance).toFixed(2);
     return result;
   }
 
@@ -36,6 +38,7 @@ export class UsersService {
     const users = await this.userModel.findAll();
     return users.map(u => {
       const { password, ...result } = u.toJSON();
+      result.balance = Number(result.balance).toFixed(2);
       return result;
     });
   }
@@ -51,6 +54,7 @@ export class UsersService {
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
     const { password, ...result } = user.toJSON();
+    result.balance = Number(result.balance).toFixed(2);
     return result;
   }
 
@@ -63,6 +67,38 @@ export class UsersService {
     await user.save();
 
     const { password, ...result } = user.toJSON();
+    result.balance = Number(result.balance).toFixed(2);
     return result;
+  }
+
+  // Transferencia entre usuarios
+  async transfer(
+    fromUserId: string,
+    transferDto: TransferDto,
+  ): Promise<{ from: Omit<User, 'password'>; to: Omit<User, 'password'> }> {
+    const fromUser = await this.userModel.findByPk(fromUserId);
+    if (!fromUser) throw new NotFoundException('Usuario remitente no encontrado');
+
+    const toUser = await this.userModel.findByPk(transferDto.toUserId);
+    if (!toUser) throw new NotFoundException('Usuario destinatario no encontrado');
+
+    if (Number(fromUser.balance) < transferDto.amount) {
+      throw new Error('Saldo insuficiente para realizar la transferencia');
+    }
+
+    // Realizar transferencia como números
+    fromUser.balance = Number(fromUser.balance) - Number(transferDto.amount);
+    toUser.balance = Number(toUser.balance) + Number(transferDto.amount);
+
+    await fromUser.save();
+    await toUser.save();
+
+    const { password: _, ...from } = fromUser.toJSON();
+    const { password: __, ...to } = toUser.toJSON();
+
+    from.balance = Number(from.balance).toFixed(2);
+    to.balance = Number(to.balance).toFixed(2);
+
+    return { from, to };
   }
 }
