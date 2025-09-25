@@ -15,5 +15,5 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsNumber({}, { message: 'El balance debe ser un número' })
-  balance?: number; // balance inicial opcional
+  balance?: number; 
 }

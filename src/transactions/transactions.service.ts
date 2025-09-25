@@ -14,53 +14,55 @@ export class TransactionsService {
   ) {}
 
   async create(
-    senderId: string,
-    dto: { receiver_id: string; amount: string; description?: string },
-  ) {
-    const amount = parseFloat(dto.amount);
-    if (isNaN(amount) || amount <= 0)
-      throw new BadRequestException('Invalid amount');
+  senderId: string,
+  dto: { receiver_id: string; amount: string; description?: string },
+) {
+  const amount = parseFloat(dto.amount);
+  if (isNaN(amount) || amount <= 0)
+    throw new BadRequestException('Invalid amount');
 
-    return await this.sequelize.transaction(async (t) => {
-      // Bloquear filas para update
-      const sender = await this.userModel.findByPk(senderId, {
-        transaction: t,
-        lock: t.LOCK.UPDATE,
-      });
-      if (!sender) throw new NotFoundException('Sender not found');
-
-      const receiver = await this.userModel.findByPk(dto.receiver_id, {
-        transaction: t,
-        lock: t.LOCK.UPDATE,
-      });
-      if (!receiver) throw new NotFoundException('Receiver not found');
-
-      const senderBalance = Number(sender.balance);
-      const receiverBalance = Number(receiver.balance);
-
-      if (senderBalance < amount)
-        throw new BadRequestException('Insufficient funds');
-
-      // Actualizar balances como números
-      sender.balance = Number((senderBalance - amount).toFixed(2));
-      receiver.balance = Number((receiverBalance + amount).toFixed(2));
-
-      await sender.save({ transaction: t });
-      await receiver.save({ transaction: t });
-
-      const tx = await this.txModel.create(
-        {
-          sender_id: sender.id,
-          receiver_id: receiver.id,
-          amount: Number(amount.toFixed(2)),
-          description: dto.description || null,
-        } as any,
-        { transaction: t },
-      );
-
-      return tx.toJSON();
-    });
+  if (senderId === dto.receiver_id) {
+    throw new BadRequestException('No puedes transferirte dinero a ti mismo');
   }
+
+  return await this.sequelize.transaction(async (t) => {
+    const sender = await this.userModel.findByPk(senderId, {
+      transaction: t,
+      lock: t.LOCK.UPDATE,
+    });
+    if (!sender) throw new NotFoundException('Sender not found');
+
+    const receiver = await this.userModel.findByPk(dto.receiver_id, {
+      transaction: t,
+      lock: t.LOCK.UPDATE,
+    });
+    if (!receiver) throw new NotFoundException('Receiver not found');
+
+    const senderBalance = Number(sender.balance);
+    const receiverBalance = Number(receiver.balance);
+
+    if (senderBalance < amount)
+      throw new BadRequestException('Insufficient funds');
+
+    sender.balance = Number((senderBalance - amount).toFixed(2));
+    receiver.balance = Number((receiverBalance + amount).toFixed(2));
+
+    await sender.save({ transaction: t });
+    await receiver.save({ transaction: t });
+
+    const tx = await this.txModel.create(
+      {
+        sender_id: sender.id,
+        receiver_id: receiver.id,
+        amount: Number(amount.toFixed(2)),
+        description: dto.description || null,
+      } as any,
+      { transaction: t },
+    );
+
+    return tx.toJSON();
+  });
+}
 
   async findAllForUser(userId: string) {
     return this.txModel.findAll({
@@ -74,6 +76,6 @@ export class TransactionsService {
   async findById(id: string) {
     const tx = await this.txModel.findByPk(id);
     if (!tx) throw new NotFoundException('Transacción no encontrada');
-    return tx.toJSON(); // Convierte el modelo a objeto plano
+    return tx.toJSON(); 
   }
 }

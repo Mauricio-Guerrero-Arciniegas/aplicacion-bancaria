@@ -10,7 +10,6 @@ async function bootstrap() {
   app.use(helmet());
   app.use(cors());
 
-  // 👇 ESTA LÍNEA ES CRÍTICA
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,

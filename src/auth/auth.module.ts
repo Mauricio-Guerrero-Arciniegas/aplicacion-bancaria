@@ -8,7 +8,7 @@ import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
-    forwardRef(() => UsersModule), // evita bucle circular con UsersModule
+    forwardRef(() => UsersModule), 
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'supersecret',

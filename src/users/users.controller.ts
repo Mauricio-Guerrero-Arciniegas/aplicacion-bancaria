@@ -9,7 +9,6 @@ import { TransferDto } from './dto/transfer.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // Obtener perfil del usuario autenticado
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getProfile(@Req() req: Request) {
@@ -17,15 +16,11 @@ export class UsersController {
     return this.usersService.findById(user.id);
   }
 
-  // Registro de usuario
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
-    // Llama al método "create" de UsersService
-    // ya elimina password y genera account_number bancario
     return this.usersService.create(createUserDto);
   }
 
-  // Listar todos los usuarios (sin password)
   @UseGuards(JwtAuthGuard)
   @Get()
   async findAll() {
@@ -35,7 +30,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Patch('transfer')
   async transfer(@Req() req: Request, @Body() transferDto: TransferDto) {
-    const user = req.user as any; // remitente
+    const user = req.user as any; 
     return this.usersService.transfer(user.id, transferDto);
   }
 }

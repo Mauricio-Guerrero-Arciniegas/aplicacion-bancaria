@@ -7,11 +7,11 @@ import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([User]), // 👈 modelo User
-    forwardRef(() => AuthModule),       // 👈 evita circular import con AuthModule
+    SequelizeModule.forFeature([User]),
+    forwardRef(() => AuthModule),       
   ],
   providers: [UsersService],
   controllers: [UsersController],
-  exports: [UsersService],              // 👈 permite que AuthService lo use
+  exports: [UsersService],         
 })
 export class UsersModule {}

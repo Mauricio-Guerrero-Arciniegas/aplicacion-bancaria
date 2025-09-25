@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -12,11 +12,9 @@ export class UsersService {
     private readonly userModel: typeof User,
   ) {}
 
-  // Crear usuario con balance opcional
   async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    // Número de cuenta estilo bancario: AC- seguido de 10 dígitos
     const accountNumber =
       'AC-' + Math.floor(1000000000 + Math.random() * 9000000000).toString();
 
@@ -25,7 +23,7 @@ export class UsersService {
       email: createUserDto.email,
       password: hashedPassword,
       account_number: accountNumber,
-      balance: createUserDto.balance ?? 0, // si no se envía, balance 0
+      balance: createUserDto.balance ?? 0, 
     } as any);
 
     const { password, ...result } = user.toJSON();
@@ -33,7 +31,6 @@ export class UsersService {
     return result;
   }
 
-  // Obtener todos los usuarios (sin password)
   async findAll(): Promise<Omit<User, 'password'>[]> {
     const users = await this.userModel.findAll();
     return users.map(u => {
@@ -43,12 +40,10 @@ export class UsersService {
     });
   }
 
-  // Buscar usuario por email (incluye password para login)
   async findByEmail(email: string): Promise<User | null> {
     return this.userModel.findOne({ where: { email } });
   }
 
-  // Buscar usuario por id (sin password)
   async findById(id: string): Promise<Omit<User, 'password'>> {
     const user = await this.userModel.findByPk(id);
     if (!user) throw new NotFoundException('Usuario no encontrado');
@@ -58,7 +53,6 @@ export class UsersService {
     return result;
   }
 
-  // Actualizar balance de un usuario
   async updateBalance(userId: string, amount: number): Promise<Omit<User, 'password'>> {
     const user = await this.userModel.findByPk(userId);
     if (!user) throw new NotFoundException('Usuario no encontrado');
@@ -71,11 +65,13 @@ export class UsersService {
     return result;
   }
 
-  // Transferencia entre usuarios
   async transfer(
     fromUserId: string,
     transferDto: TransferDto,
   ): Promise<{ from: Omit<User, 'password'>; to: Omit<User, 'password'> }> {
+    if (fromUserId === transferDto.toUserId) {
+    throw new BadRequestException('No puedes transferirte dinero a ti mismo');
+  }
     const fromUser = await this.userModel.findByPk(fromUserId);
     if (!fromUser) throw new NotFoundException('Usuario remitente no encontrado');
 
@@ -86,7 +82,6 @@ export class UsersService {
       throw new Error('Saldo insuficiente para realizar la transferencia');
     }
 
-    // Realizar transferencia como números
     fromUser.balance = Number(fromUser.balance) - Number(transferDto.amount);
     toUser.balance = Number(toUser.balance) + Number(transferDto.amount);
 

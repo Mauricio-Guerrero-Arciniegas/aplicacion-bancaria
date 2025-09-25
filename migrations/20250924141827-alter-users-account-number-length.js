@@ -3,7 +3,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.changeColumn('users', 'account_number', {
-      type: Sequelize.STRING(36), // 🔥 aumentamos la longitud
+      type: Sequelize.STRING(36), 
       allowNull: false,
       unique: true,
     });
@@ -11,7 +11,7 @@ module.exports = {
 
   async down(queryInterface, Sequelize) {
     await queryInterface.changeColumn('users', 'account_number', {
-      type: Sequelize.STRING(36), // 🔙 rollback si es necesario
+      type: Sequelize.STRING(36), 
       allowNull: false,
       unique: true,
     });

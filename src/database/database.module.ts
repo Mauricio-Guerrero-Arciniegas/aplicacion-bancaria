@@ -29,7 +29,6 @@ export class DatabaseModule implements OnModuleInit {
   constructor(private readonly sequelize: Sequelize) {}
 
   async onModuleInit() {
-    // Ensure models are in sync for development purpose
     await this.sequelize.sync({ alter: true });
   }
 }

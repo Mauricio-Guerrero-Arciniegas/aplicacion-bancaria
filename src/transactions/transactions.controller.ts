@@ -24,7 +24,6 @@ export class TransactionsController {
   @Get(':id')
   async findOne(@Req() req: any, @Param('id') id: string) {
     const tx = await this.txService.findById(id);
-    // Validar que el usuario sea remitente o receptor
     if (tx.sender_id !== req.user.id && tx.receiver_id !== req.user.id)
       throw new NotFoundException('Transacción no encontrada para este usuario');
     return tx;
