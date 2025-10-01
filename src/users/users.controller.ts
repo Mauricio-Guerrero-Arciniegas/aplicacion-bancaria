@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
 import { Request } from 'express';
@@ -28,9 +28,16 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('transfer')
+  @Post('transfer')
   async transfer(@Req() req: Request, @Body() transferDto: TransferDto) {
     const user = req.user as any; 
     return this.usersService.transfer(user.id, transferDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('transactions')
+  async getTransactions(@Req() req: Request) {
+    const user = req.user as any;
+    return this.usersService.getTransactions(user.id);
   }
 }
