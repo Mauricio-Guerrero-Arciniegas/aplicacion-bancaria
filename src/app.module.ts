@@ -7,19 +7,21 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env', // asegura que lea tu archivo .env
+    }),
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
         dialect: 'postgres',
-        host: config.get<string>('DATABASE_HOST') ?? 'localhost',
+        host: config.get<string>('DATABASE_HOST'),
         port: parseInt(config.get<string>('DATABASE_PORT') ?? '5432', 10),
-        username: config.get<string>('DATABASE_USERNAME') ?? 'postgres',
-        password: config.get<string>('DATABASE_PASSWORD') ?? '',
-        database: config.get<string>('DATABASE_NAME') ?? 'testdb',
+        username: config.get<string>('DATABASE_USERNAME'),
+        password: config.get<string>('DATABASE_PASSWORD'),
+        database: config.get<string>('DATABASE_NAME'),
         autoLoadModels: true,
-        //sync: { force: true },
         synchronize: true,
         dialectOptions: {
           ssl: {

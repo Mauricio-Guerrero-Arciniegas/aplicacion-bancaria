@@ -1,39 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import helmet from 'helmet';
-import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Seguridad
-  app.use(helmet());
+  const configService = app.get(ConfigService);
 
-  // CORS dinámico (Railway inyecta ALLOWED_ORIGINS)
-  const allowed = process.env.ALLOWED_ORIGINS ?? 'http://localhost:3000';
-  const allowedOrigins = allowed.split(',').map(s => s.trim());
+  // Configurar CORS dinámicamente
+  const allowedOrigins = (configService.get<string>('ALLOWED_ORIGINS') ?? '')
+    .split(',')
+    .map(origin => origin.trim());
 
   app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'), false);
-      }
-    },
-    credentials: true,
+    origin: allowedOrigins,
   });
 
-  // Validaciones globales
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }));
-
-  // Puerto dinámico (Railway usa process.env.PORT)
-  const port = process.env.PORT || 3000;
+  const port = parseInt(configService.get<string>('PORT') ?? '3000', 10);
   await app.listen(port);
-  console.log(`🚀 Server running on port ${port}`);
+  console.log(`App listening on port ${port}`);
 }
 bootstrap();
