@@ -5,20 +5,20 @@ import { Request } from 'express';
 import { CreateUserDto } from './dto/create-user.dto';
 import { TransferDto } from './dto/transfer.dto';
 
-@Controller('api/users')
+@Controller('api/users') // prefijo /api
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post('register')
+  async register(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getProfile(@Req() req: Request) {
     const user = req.user as any;
     return this.usersService.findById(user.id);
-  }
-
-  @Post('register')
-  async register(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
   }
 
   @UseGuards(JwtAuthGuard)

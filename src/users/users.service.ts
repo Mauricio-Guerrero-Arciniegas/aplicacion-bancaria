@@ -36,6 +36,7 @@ export class UsersService {
       result.balance = Number(result.balance).toFixed(2);
       return result;
     } catch (error) {
+      console.log('Error al crear usuario:', error);
       if (error instanceof UniqueConstraintError) {
         throw new BadRequestException('El correo ya está registrado');
       }
