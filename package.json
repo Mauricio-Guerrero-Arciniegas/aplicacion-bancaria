@@ -6,11 +6,8 @@
   "scripts": {
   "start": "node dist/main.js",
   "start:dev": "nest start --watch",
-  "build": "tsc -p tsconfig.json",
-  "lint": "eslint \"src/**/*.ts\" --fix",
-  "migration": "npx sequelize-cli db:migrate",
-  "seed": "npx sequelize-cli db:seed:all",
-  "test": "jest"
+  "build": "tsc -p tsconfig.build.json"
+
 },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
