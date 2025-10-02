@@ -4,15 +4,15 @@
   "description": "Backend para aplicación bancaria - NestJS + Sequelize + PostgreSQL",
   "main": "dist/main.js",
   "scripts": {
-     "prestart": "npm run build",
-  "start": "node dist/main.js",
+  "prestart": "npm run build",
+  "start": "npm run build && node dist/main.js",
   "start:dev": "nest start --watch",
   "build": "nest build",
   "lint": "eslint \"src/**/*.ts\" --fix",
   "migration": "npx sequelize-cli db:migrate",
   "seed": "npx sequelize-cli db:seed:all",
   "test": "jest"
-  },
+},
   "dependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.3.0",
