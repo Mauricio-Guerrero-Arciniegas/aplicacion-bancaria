@@ -19,7 +19,7 @@ import { AuthModule } from './auth/auth.module';
         password: config.get<string>('DATABASE_PASSWORD'),
         database: config.get<string>('DATABASE_NAME'),
         autoLoadModels: true,
-        synchronize: true, // ojo: en producción puedes poner false
+        synchronize: true, 
         logging: false,
         dialectOptions: {
           ssl: {
