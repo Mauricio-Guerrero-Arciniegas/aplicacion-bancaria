@@ -4,9 +4,9 @@
   "description": "Backend para aplicación bancaria - NestJS + Sequelize + PostgreSQL",
   "main": "dist/main.js",
  "scripts": {
-  "start": "node dist/main.js",
+  "start": "npm run build && node dist/main.js",
   "start:dev": "nest start --watch",
-  "build": "nest build"
+  "build": "tsc -p tsconfig.build.json"
 },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
