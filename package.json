@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "description": "Backend para aplicación bancaria - NestJS + Sequelize + PostgreSQL",
   "main": "dist/main.js",
-  "scripts": {
-    "start": "npm run build && node dist/main.js",
-    "start:dev": "nest start --watch",
-    "build": "tsc -p tsconfig.build.json"
-  },
+ "scripts": {
+  "build": "tsc -p tsconfig.build.json",
+  "start": "node dist/main.js",
+  "start:dev": "nest start --watch"
+},
   "dependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.3.0",
