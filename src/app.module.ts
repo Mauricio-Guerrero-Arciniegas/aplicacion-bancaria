@@ -14,19 +14,16 @@ import { AuthModule } from './auth/auth.module';
       useFactory: async (config: ConfigService) => ({
         dialect: 'postgres',
         host: config.get<string>('DATABASE_HOST'),
-        port: parseInt(config.get<string>('DATABASE_PORT')!, 10),
+        port: parseInt(config.get<string>('DATABASE_PORT') || '5432', 10),
         username: config.get<string>('DATABASE_USERNAME'),
         password: config.get<string>('DATABASE_PASSWORD'),
         database: config.get<string>('DATABASE_NAME'),
         autoLoadModels: true,
-        synchronize: true, 
+        synchronize: true,
         logging: false,
-        dialectOptions: {
-          ssl: {
-            require: true,
-            rejectUnauthorized: false,
-          },
-        },
+        dialectOptions: config.get<string>('DATABASE_HOST')?.includes('neon.tech')
+          ? { ssl: { require: true, rejectUnauthorized: false } }
+          : {},
       }),
     }),
     UsersModule,
